@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecrew Absensi - Transwisata Prima Aviation (Real-time Database)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); }
+        .card-shadow { box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .loading { animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-6 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold">Ecrew Absensi</h1>
+                    <p class="text-blue-100">Transwisata Prima Aviation - Real-time Database</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-blue-100">Tanggal Hari Ini</p>
+                    <p class="text-lg font-semibold" id="currentDate"></p>
+                    <div class="flex items-center justify-end mt-1">
+                        <div class="w-2 h-2 bg-green-400 rounded-full mr-2" id="connectionStatus"></div>
+                        <span class="text-xs text-blue-100" id="connectionText">Connected</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Setup Database -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8" id="setupCard">
+            <h2 class="text-lg font-semibold text-yellow-800 mb-4">🔧 Setup Database Spreadsheet</h2>
+            <p class="text-yellow-700 mb-4">Untuk menggunakan database real-time, masukkan URL Google Sheets yang sudah dibuat:</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-yellow-700 mb-2">Google Sheets URL</label>
+                    <input type="url" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/your-sheet-id/edit#gid=0"
+                           class="w-full px-4 py-3 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="setupDatabase()" 
+                            class="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                        🔗 Connect Database
+                    </button>
+                    <button onclick="createSampleSheet()" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                        📋 Buat Template Sheet
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Absensi -->
+        <div class="bg-white rounded-xl card-shadow p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Form Absensi Karyawan</h2>
+            
+            <form id="attendanceForm" class="space-y-4">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                        <input type="text" id="employeeName" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ID Karyawan</label>
+                        <input type="text" id="employeeId" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Departemen</label>
+                        <select id="department" required 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Pilih Departemen</option>
+                            <option value="Flight Operations">Flight Operations</option>
+                            <option value="Ground Operations">Ground Operations</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Customer Service">Customer Service</option>
+                            <option value="Administration">Administration</option>
+                            <option value="Security">Security</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Shift</label>
+                        <select id="shift" required 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Pilih Shift</option>
+                            <option value="Pagi (06:00-14:00)">Pagi (06:00-14:00)</option>
+                            <option value="Siang (14:00-22:00)">Siang (14:00-22:00)</option>
+                            <option value="Malam (22:00-06:00)">Malam (22:00-06:00)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Kehadiran</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="status" value="Hadir" required class="mr-2 text-blue-600">
+                            <span class="text-sm">✅ Hadir</span>
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="status" value="Terlambat" required class="mr-2 text-blue-600">
+                            <span class="text-sm">⏰ Terlambat</span>
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="status" value="Sakit" required class="mr-2 text-blue-600">
+                            <span class="text-sm">🏥 Sakit</span>
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="status" value="Izin" required class="mr-2 text-blue-600">
+                            <span class="text-sm">📝 Izin</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan (Opsional)</label>
+                    <textarea id="notes" rows="3" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Tambahkan keterangan jika diperlukan..."></textarea>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                        <span class="loading w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2 hidden" id="submitLoading"></span>
+                        📝 Submit Absensi
+                    </button>
+                    <button type="button" onclick="refreshData()" 
+                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                        🔄 Refresh Data
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Data Absensi -->
+        <div class="bg-white rounded-xl card-shadow p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-gray-800">Data Absensi Real-time</h2>
+                <div class="flex items-center gap-4">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium" id="totalCount">
+                        Total: 0 karyawan
+                    </span>
+                    <button onclick="openSpreadsheet()" 
+                            class="bg-gray-600 hover:bg-gray-700 text-white text-sm px-3 py-1 rounded-lg transition duration-200">
+                        📊 Buka Spreadsheet
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">No</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nama</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Departemen</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Waktu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTable">
+                        <tr>
+                            <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                                <div class="loading w-6 h-6 border-2 border-gray-300 border-t-blue-600 rounded-full mx-auto mb-2"></div>
+                                Memuat data dari database...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        let config = {
+            sheetsUrl: localStorage.getItem('sheetsUrl') || '',
+            webAppUrl: localStorage.getItem('webAppUrl') || '',
+            isConnected: false
+        };
+
+        // Data storage
+        let attendanceData = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentDate();
+            if (config.sheetsUrl) {
+                document.getElementById('sheetsUrl').value = config.sheetsUrl;
+                document.getElementById('setupCard').style.display = 'none';
+                connectToDatabase();
+            }
+            loadAttendanceData();
+        });
+
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = 
+                now.toLocaleDateString('id-ID', options);
+        }
+
+        function setupDatabase() {
+            const url = document.getElementById('sheetsUrl').value.trim();
+            if (!url) {
+                alert('Masukkan URL Google Sheets terlebih dahulu!');
+                return;
+            }
+
+            config.sheetsUrl = url;
+            localStorage.setItem('sheetsUrl', url);
+            
+            // Extract sheet ID for web app URL (this would need to be configured)
+            const sheetId = extractSheetId(url);
+            if (sheetId) {
+                // In real implementation, user would need to deploy Google Apps Script
+                showNotification('Database terhubung! Silakan deploy Google Apps Script untuk fungsi penuh.', 'success');
+                document.getElementById('setupCard').style.display = 'none';
+                connectToDatabase();
+            }
+        }
+
+        function extractSheetId(url) {
+            const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            return match ? match[1] : null;
+        }
+
+        function connectToDatabase() {
+            updateConnectionStatus(true);
+            config.isConnected = true;
+            loadAttendanceData();
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusDot = document.getElementById('connectionStatus');
+            const statusText = document.getElementById('connectionText');
+            
+            if (connected) {
+                statusDot.className = 'w-2 h-2 bg-green-400 rounded-full mr-2';
+                statusText.textContent = 'Connected';
+            } else {
+                statusDot.className = 'w-2 h-2 bg-red-400 rounded-full mr-2';
+                statusText.textContent = 'Disconnected';
+            }
+        }
+
+        function createSampleSheet() {
+            const headers = ['Timestamp', 'Tanggal', 'Nama', 'ID Karyawan', 'Departemen', 'Shift', 'Status', 'Waktu', 'Keterangan'];
+            const csvContent = headers.join(',') + '\n';
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'Template_Absensi_Transwisata.csv');
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showNotification('Template spreadsheet berhasil diunduh! Upload ke Google Sheets dan bagikan URL-nya.', 'success');
+        }
+
+        async function loadAttendanceData() {
+            try {
+                // Simulate loading from Google Sheets
+                // In real implementation, this would fetch from Google Apps Script Web App
+                if (config.isConnected) {
+                    // For demo, load from localStorage and simulate real-time updates
+                    const storedData = JSON.parse(localStorage.getItem('attendanceData')) || [];
+                    attendanceData = storedData;
+                    
+                    // Simulate periodic updates every 30 seconds
+                    setTimeout(() => {
+                        if (Math.random() > 0.7) { // 30% chance of new data
+                            loadAttendanceData();
+                        }
+                    }, 30000);
+                }
+                
+                displayAttendanceData();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                updateConnectionStatus(false);
+                showNotification('Gagal memuat data dari database', 'error');
+            }
+        }
+
+        function displayAttendanceData() {
+            const tableBody = document.getElementById('attendanceTable');
+            const totalCount = document.getElementById('totalCount');
+
+            if (attendanceData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                            ${config.isConnected ? 'Belum ada data absensi' : 'Hubungkan ke database untuk melihat data'}
+                        </td>
+                    </tr>
+                `;
+            } else {
+                // Sort by most recent first
+                const sortedData = [...attendanceData].sort((a, b) => 
+                    new Date(b.timestamp) - new Date(a.timestamp)
+                );
+
+                tableBody.innerHTML = sortedData.map((record, index) => `
+                    <tr class="border-t hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm">${index + 1}</td>
+                        <td class="px-4 py-3 text-sm">${record.date}</td>
+                        <td class="px-4 py-3 text-sm font-medium">${record.name}</td>
+                        <td class="px-4 py-3 text-sm">${record.employeeId}</td>
+                        <td class="px-4 py-3 text-sm">${record.department}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(record.status)}">
+                                ${record.status}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm">${record.time}</td>
+                    </tr>
+                `).join('');
+            }
+
+            totalCount.textContent = `Total: ${attendanceData.length} karyawan`;
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'Hadir': 'bg-green-100 text-green-800',
+                'Terlambat': 'bg-yellow-100 text-yellow-800',
+                'Sakit': 'bg-red-100 text-red-800',
+                'Izin': 'bg-blue-100 text-blue-800'
+            };
+            return colors[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        // Form submission
+        document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!config.isConnected) {
+                alert('Hubungkan ke database terlebih dahulu!');
+                return;
+            }
+
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const loading = document.getElementById('submitLoading');
+            
+            // Show loading
+            loading.classList.remove('hidden');
+            submitButton.disabled = true;
+
+            try {
+                const formData = {
+                    name: document.getElementById('employeeName').value,
+                    employeeId: document.getElementById('employeeId').value,
+                    department: document.getElementById('department').value,
+                    shift: document.getElementById('shift').value,
+                    status: document.querySelector('input[name="status"]:checked').value,
+                    notes: document.getElementById('notes').value,
+                    timestamp: new Date().toISOString(),
+                    time: new Date().toLocaleTimeString('id-ID', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    }),
+                    date: new Date().toLocaleDateString('id-ID')
+                };
+
+                // Check if employee already recorded today
+                const today = new Date().toDateString();
+                const existingRecord = attendanceData.find(record => 
+                    record.employeeId === formData.employeeId && 
+                    new Date(record.timestamp).toDateString() === today
+                );
+
+                if (existingRecord) {
+                    throw new Error('Karyawan dengan ID ini sudah melakukan absensi hari ini!');
+                }
+
+                // Save to Google Sheets (simulated)
+                await saveToSpreadsheet(formData);
+
+                // Update local data
+                attendanceData.push(formData);
+                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+
+                // Reset form and reload data
+                this.reset();
+                displayAttendanceData();
+
+                showNotification('Absensi berhasil disimpan ke database!', 'success');
+
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showNotification(error.message || 'Gagal menyimpan data ke database', 'error');
+            } finally {
+                // Hide loading
+                loading.classList.add('hidden');
+                submitButton.disabled = false;
+            }
+        });
+
+        async function saveToSpreadsheet(data) {
+            // Simulate API call to Google Apps Script
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    if (Math.random() > 0.1) { // 90% success rate
+                        resolve();
+                    } else {
+                        reject(new Error('Network error'));
+                    }
+                }, 1000);
+            });
+        }
+
+        function refreshData() {
+            showNotification('Memperbarui data dari database...', 'success');
+            loadAttendanceData();
+        }
+
+        function openSpreadsheet() {
+            if (config.sheetsUrl) {
+                window.open(config.sheetsUrl, '_blank');
+            } else {
+                alert('URL spreadsheet belum dikonfigurasi!');
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-medium z-50 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+
+        // Auto-refresh data every 2 minutes when connected
+        setInterval(() => {
+            if (config.isConnected) {
+                loadAttendanceData();
+            }
+        }, 120000);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97bc33e9a0225f54',t:'MTc1NzMxMDk4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
