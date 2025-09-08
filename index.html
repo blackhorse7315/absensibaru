@@ -24,120 +24,168 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Style untuk memastikan container login di tengah saat halaman app disembunyikan */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
-    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
-        
-        <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-blue-800">ECrew Absensi</h1>
-            <p class="text-lg text-gray-600">Transwisata Prima Aviation</p>
-        </header>
+    <!-- Halaman Login -->
+    <div id="loginPage" class="login-container">
+        <div class="w-full max-w-sm bg-white p-8 rounded-xl shadow-lg">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-blue-800">ECrew Absensi Login</h1>
+                <p class="text-gray-500">Transwisata Prima Aviation</p>
+            </div>
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Peran</label>
+                    <select id="role" name="role" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="user">User (Crew)</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" name="password" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <p id="loginError" class="text-red-500 text-sm text-center mb-4"></p>
+                <button type="submit" class="w-full px-4 py-3 bg-blue-800 text-white font-bold rounded-lg hover:bg-blue-900 focus:outline-none focus:ring-4 focus:ring-blue-300 transition">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
 
-        <!-- Form Absensi -->
-        <div class="bg-white p-6 rounded-xl shadow-md mb-8">
-            <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Formulir Kehadiran</h2>
-            <form id="attendanceForm">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Kolom Kiri -->
-                    <div>
-                        <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Kru</label>
-                        <select id="nama" name="nama" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                            <option value="">-- Pilih Nama --</option>
-                            <!-- Daftar nama kru bisa ditambahkan di sini -->
-                            <option value="Capt. John Doe" data-nip="112233">Capt. John Doe</option>
-                            <option value="FO. Jane Smith" data-nip="112244">FO. Jane Smith</option>
-                            <option value="FA. Emily White" data-nip="112255">FA. Emily White</option>
-                            <option value="FA. Michael Brown" data-nip="112266">FA. Michael Brown</option>
-                            <option value="ENG. Chris Green" data-nip="112277">ENG. Chris Green</option>
-                        </select>
-                    </div>
-                     <div>
-                        <label for="nip" class="block text-sm font-medium text-gray-700 mb-1">Nomor Induk Pegawai (NIP)</label>
-                        <input type="text" id="nip" name="nip" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-sm">
-                    </div>
+    <!-- Halaman Aplikasi Utama (Awalnya tersembunyi) -->
+    <div id="appPage" class="hidden">
+        <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+            
+            <!-- Header -->
+            <header class="text-center mb-8 relative">
+                <h1 class="text-3xl md:text-4xl font-bold text-blue-800">ECrew Absensi</h1>
+                <p class="text-lg text-gray-600">Transwisata Prima Aviation</p>
+                <button id="logoutBtn" class="absolute top-0 right-0 px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition">Logout</button>
+            </header>
 
-                    <!-- Kolom Kanan -->
-                    <div>
-                        <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                        <input type="date" id="tanggal" name="tanggal" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Status Kehadiran</label>
-                        <select id="status" name="status" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                            <option value="Hadir">Hadir</option>
-                            <option value="Izin">Izin</option>
-                            <option value="Sakit">Sakit</option>
-                            <option value="Cuti">Cuti</option>
-                        </select>
-                    </div>
-
-                    <!-- Jam & Keterangan -->
-                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Form Absensi -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Formulir Kehadiran</h2>
+                <form id="attendanceForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Kolom Kiri -->
+                        <div>
+                            <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Kru</label>
+                            <select id="nama" name="nama" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                <option value="">-- Pilih Nama --</option>
+                                <!-- Daftar nama kru bisa ditambahkan di sini -->
+                                <option value="Capt. John Doe" data-nip="112233">Capt. John Doe</option>
+                                <option value="FO. Jane Smith" data-nip="112244">FO. Jane Smith</option>
+                                <option value="FA. Emily White" data-nip="112255">FA. Emily White</option>
+                                <option value="FA. Michael Brown" data-nip="112266">FA. Michael Brown</option>
+                                <option value="ENG. Chris Green" data-nip="112277">ENG. Chris Green</option>
+                            </select>
+                        </div>
                          <div>
-                            <label for="jamMasuk" class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
-                            <div class="flex items-center space-x-2">
-                                <input type="time" id="jamMasuk" name="jamMasuk" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm">
-                                <button type="button" id="setJamMasuk" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">Sekarang</button>
-                            </div>
+                            <label for="nip" class="block text-sm font-medium text-gray-700 mb-1">Nomor Induk Pegawai (NIP)</label>
+                            <input type="text" id="nip" name="nip" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-sm">
+                        </div>
+
+                        <!-- Kolom Kanan -->
+                        <div>
+                            <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                            <input type="date" id="tanggal" name="tanggal" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                         </div>
                         <div>
-                            <label for="jamPulang" class="block text-sm font-medium text-gray-700 mb-1">Jam Pulang (Opsional)</label>
-                            <div class="flex items-center space-x-2">
-                               <input type="time" id="jamPulang" name="jamPulang" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm">
-                               <button type="button" id="setJamPulang" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">Sekarang</button>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Kehadiran</label>
+                            <select id="status" name="status" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                <option value="Hadir">Hadir</option>
+                                <option value="Izin">Izin</option>
+                                <option value="Sakit">Sakit</option>
+                                <option value="Cuti">Cuti</option>
+                            </select>
+                        </div>
+
+                        <!-- Jam & Keterangan -->
+                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <div>
+                                <label for="jamMasuk" class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="time" id="jamMasuk" name="jamMasuk" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm">
+                                    <button type="button" id="setJamMasuk" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">Sekarang</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="jamPulang" class="block text-sm font-medium text-gray-700 mb-1">Jam Pulang (Opsional)</label>
+                                <div class="flex items-center space-x-2">
+                                   <input type="time" id="jamPulang" name="jamPulang" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm">
+                                   <button type="button" id="setJamPulang" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">Sekarang</button>
+                                </div>
                             </div>
                         </div>
+                        
+                        <div class="md:col-span-2">
+                            <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+                            <textarea id="keterangan" name="keterangan" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Contoh: Bertugas untuk penerbangan ke Bali"></textarea>
+                        </div>
                     </div>
-                    
-                    <div class="md:col-span-2">
-                        <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
-                        <textarea id="keterangan" name="keterangan" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Contoh: Bertugas untuk penerbangan ke Bali"></textarea>
+
+                    <!-- Tombol Submit -->
+                    <div class="mt-8 text-right">
+                        <button type="submit" id="submitBtn" class="px-8 py-3 bg-blue-800 text-white font-bold rounded-lg hover:bg-blue-900 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105">
+                            Kirim Absensi
+                        </button>
                     </div>
-                </div>
-
-                <!-- Tombol Submit -->
-                <div class="mt-8 text-right">
-                    <button type="submit" id="submitBtn" class="px-8 py-3 bg-blue-800 text-white font-bold rounded-lg hover:bg-blue-900 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105">
-                        Kirim Absensi
-                    </button>
-                </div>
-            </form>
-            <div id="messageBox" class="mt-4 text-center"></div>
-        </div>
-
-        <!-- Log Absensi Real-time -->
-        <div class="bg-white p-6 rounded-xl shadow-md">
-            <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Log Absensi Hari Ini</h2>
-             <div class="flex justify-center items-center h-40" id="loaderContainer">
-                <div class="loader"></div>
-                <p class="ml-4 text-gray-500">Memuat data...</p>
+                </form>
+                <div id="messageBox" class="mt-4 text-center"></div>
             </div>
-            <div class="overflow-x-auto" id="logContainer" style="display:none;">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceLog" class="bg-white divide-y divide-gray-200">
-                        <!-- Data akan dimasukkan oleh JavaScript -->
-                    </tbody>
-                </table>
+
+            <!-- Log Absensi Real-time -->
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Log Absensi Hari Ini</h2>
+                 <div class="flex justify-center items-center h-40" id="loaderContainer">
+                    <div class="loader"></div>
+                    <p class="ml-4 text-gray-500">Memuat data...</p>
+                </div>
+                <div class="overflow-x-auto" id="logContainer" style="display:none;">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceLog" class="bg-white divide-y divide-gray-200">
+                            <!-- Data akan dimasukkan oleh JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-
     </div>
 
     <script>
-        // PENTING: Ganti URL ini dengan URL Web App dari Google Apps Script Anda
+        // --- PENGATURAN ---
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw6AkHW-QYQPKYoQXpgqW9tTIb0AXJW67o0xk_D4KUT3kfcYLwueIaMUu03GoNLvXq/exec';
+        const ADMIN_PASSWORD = 'admin'; // Ganti password admin di sini
+        const USER_PASSWORD = 'user';   // Ganti password user di sini
 
+        // --- ELEMEN DOM ---
+        const loginPage = document.getElementById('loginPage');
+        const appPage = document.getElementById('appPage');
+        const loginForm = document.getElementById('loginForm');
+        const roleSelect = document.getElementById('role');
+        const passwordInput = document.getElementById('password');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
         const form = document.getElementById('attendanceForm');
         const submitBtn = document.getElementById('submitBtn');
         const messageBox = document.getElementById('messageBox');
@@ -155,7 +203,55 @@
         const loaderContainer = document.getElementById('loaderContainer');
         const logContainer = document.getElementById('logContainer');
 
-        // Fungsi untuk mendapatkan waktu saat ini dalam format HH:MM
+        // --- LOGIKA LOGIN & LOGOUT ---
+
+        const handleLogin = (e) => {
+            e.preventDefault();
+            const role = roleSelect.value;
+            const password = passwordInput.value;
+            let isAuthenticated = false;
+
+            if (role === 'admin' && password === ADMIN_PASSWORD) {
+                isAuthenticated = true;
+            } else if (role === 'user' && password === USER_PASSWORD) {
+                isAuthenticated = true;
+            }
+
+            if (isAuthenticated) {
+                sessionStorage.setItem('loggedInUser', role);
+                showAppPage();
+            } else {
+                loginError.textContent = 'Peran atau password salah.';
+                passwordInput.value = '';
+            }
+        };
+
+        const handleLogout = () => {
+            sessionStorage.removeItem('loggedInUser');
+            showLoginPage();
+        };
+
+        const showLoginPage = () => {
+            loginPage.style.display = 'flex';
+            appPage.style.display = 'none';
+            loginError.textContent = '';
+            passwordInput.value = '';
+        };
+
+        const showAppPage = () => {
+            loginPage.style.display = 'none';
+            appPage.style.display = 'block';
+            // Muat data absensi setelah berhasil login
+            fetchAttendance(); 
+            // Refresh data setiap 30 detik
+            setInterval(fetchAttendance, 30000);
+        };
+        
+        loginForm.addEventListener('submit', handleLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+
+        // --- FUNGSI APLIKASI ABSENSI ---
+
         const getCurrentTime = () => {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
@@ -163,7 +259,6 @@
             return `${hours}:${minutes}`;
         };
 
-        // Fungsi untuk mendapatkan tanggal saat ini dalam format YYYY-MM-DD
         const getCurrentDate = () => {
             const now = new Date();
             const year = now.getFullYear();
@@ -172,17 +267,14 @@
             return `${year}-${month}-${day}`;
         };
 
-        // Event listener untuk tombol jam
         setJamMasukBtn.addEventListener('click', () => jamMasukInput.value = getCurrentTime());
         setJamPulangBtn.addEventListener('click', () => jamPulangInput.value = getCurrentTime());
 
-        // Otomatis isi NIP saat nama dipilih
         namaSelect.addEventListener('change', (e) => {
             const selectedOption = e.target.options[e.target.selectedIndex];
             nipInput.value = selectedOption.dataset.nip || '';
         });
 
-        // Tampilkan pesan
         const showMessage = (message, isError = false) => {
             messageBox.textContent = message;
             messageBox.className = `mt-4 text-center p-3 rounded-lg ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
@@ -192,7 +284,6 @@
             }, 5000);
         };
 
-        // Fungsi submit form
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (SCRIPT_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
@@ -210,9 +301,7 @@
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'cors',
-                headers: {
-                    'Content-Type': 'text/plain;charset=utf-8',
-                },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(data)
             })
             .then(res => res.json())
@@ -220,7 +309,8 @@
                 if(data.result === "success") {
                     showMessage('Absensi berhasil dikirim!', false);
                     form.reset();
-                    fetchAttendance(); // Muat ulang data log
+                    tanggalInput.value = getCurrentDate(); // Set tanggal kembali ke hari ini
+                    fetchAttendance();
                 } else {
                     throw new Error(data.message || 'Terjadi kesalahan');
                 }
@@ -235,7 +325,6 @@
             });
         });
 
-        // Fungsi untuk mengambil data absensi
         const fetchAttendance = () => {
             if (SCRIPT_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
                 loaderContainer.innerHTML = '<p class="text-red-500">URL Google Apps Script belum diatur.</p>';
@@ -248,8 +337,8 @@
             fetch(SCRIPT_URL)
                 .then(res => res.json())
                 .then(data => {
-                    attendanceLog.innerHTML = ''; // Kosongkan tabel sebelum diisi
-                    if (data.length > 0) {
+                    attendanceLog.innerHTML = '';
+                    if (data && data.length > 0) {
                         data.forEach(row => {
                             const tr = document.createElement('tr');
                             
@@ -291,13 +380,17 @@
                 });
         };
 
-        // Inisialisasi halaman
+        // --- INISIALISASI HALAMAN ---
         document.addEventListener('DOMContentLoaded', () => {
             tanggalInput.value = getCurrentDate();
-            fetchAttendance();
-            // Refresh data setiap 30 detik
-            setInterval(fetchAttendance, 30000);
+            // Cek apakah user sudah login sebelumnya di sesi ini
+            if (sessionStorage.getItem('loggedInUser')) {
+                showAppPage();
+            } else {
+                showLoginPage();
+            }
         });
     </script>
 </body>
 </html>
+
