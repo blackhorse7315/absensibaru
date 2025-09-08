@@ -39,24 +39,49 @@
         <!-- Setup Database -->
         <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8" id="setupCard">
             <h2 class="text-lg font-semibold text-yellow-800 mb-4">🔧 Setup Database Spreadsheet</h2>
-            <p class="text-yellow-700 mb-4">Untuk menggunakan database real-time, masukkan URL Google Sheets yang sudah dibuat:</p>
+            <p class="text-yellow-700 mb-4">Masukkan Google Apps Script Web App URL untuk koneksi database:</p>
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-yellow-700 mb-2">Google Sheets URL</label>
-                    <input type="url" id="sheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/your-sheet-id/edit#gid=0"
+                    <label class="block text-sm font-medium text-yellow-700 mb-2">Google Apps Script Web App URL</label>
+                    <input type="url" id="webAppUrl" placeholder="https://script.google.com/macros/s/your-script-id/exec"
                            class="w-full px-4 py-3 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    <p class="text-xs text-yellow-600 mt-1">Dapatkan URL ini setelah deploy Google Apps Script</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-yellow-700 mb-2">Google Sheets ID</label>
+                    <input type="text" id="sheetsId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+                           class="w-full px-4 py-3 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    <p class="text-xs text-yellow-600 mt-1">ID dari URL Google Sheets Anda</p>
                 </div>
                 <div class="flex gap-4">
                     <button onclick="setupDatabase()" 
                             class="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
                         🔗 Connect Database
                     </button>
-                    <button onclick="createSampleSheet()" 
+                    <button onclick="createGoogleScript()" 
+                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                        📝 Download Script
+                    </button>
+                    <button onclick="testConnection()" 
                             class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
-                        📋 Buat Template Sheet
+                        🧪 Test Connection
                     </button>
                 </div>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="mt-6 p-4 bg-white rounded-lg border border-yellow-200">
+                <h3 class="font-semibold text-yellow-800 mb-2">📋 Langkah Setup:</h3>
+                <ol class="text-sm text-yellow-700 space-y-1 list-decimal list-inside">
+                    <li>Buat Google Sheets baru untuk database absensi</li>
+                    <li>Copy ID dari URL Google Sheets (bagian setelah /d/)</li>
+                    <li>Klik "Download Script" untuk mendapatkan Google Apps Script</li>
+                    <li>Buka script.google.com, buat project baru, paste script</li>
+                    <li>Deploy sebagai Web App dengan akses "Anyone"</li>
+                    <li>Copy URL Web App dan masukkan di form di atas</li>
+                    <li>Klik "Connect Database" untuk menghubungkan</li>
+                </ol>
             </div>
         </div>
 
@@ -191,8 +216,8 @@
     <script>
         // Configuration
         let config = {
-            sheetsUrl: localStorage.getItem('sheetsUrl') || '',
             webAppUrl: localStorage.getItem('webAppUrl') || '',
+            sheetsId: localStorage.getItem('sheetsId') || '',
             isConnected: false
         };
 
@@ -202,8 +227,9 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             updateCurrentDate();
-            if (config.sheetsUrl) {
-                document.getElementById('sheetsUrl').value = config.sheetsUrl;
+            if (config.webAppUrl && config.sheetsId) {
+                document.getElementById('webAppUrl').value = config.webAppUrl;
+                document.getElementById('sheetsId').value = config.sheetsId;
                 document.getElementById('setupCard').style.display = 'none';
                 connectToDatabase();
             }
@@ -223,28 +249,124 @@
         }
 
         function setupDatabase() {
-            const url = document.getElementById('sheetsUrl').value.trim();
-            if (!url) {
-                alert('Masukkan URL Google Sheets terlebih dahulu!');
+            const webAppUrl = document.getElementById('webAppUrl').value.trim();
+            const sheetsId = document.getElementById('sheetsId').value.trim();
+            
+            if (!webAppUrl || !sheetsId) {
+                alert('Masukkan Web App URL dan Sheets ID terlebih dahulu!');
                 return;
             }
 
-            config.sheetsUrl = url;
-            localStorage.setItem('sheetsUrl', url);
+            config.webAppUrl = webAppUrl;
+            config.sheetsId = sheetsId;
+            localStorage.setItem('webAppUrl', webAppUrl);
+            localStorage.setItem('sheetsId', sheetsId);
             
-            // Extract sheet ID for web app URL (this would need to be configured)
-            const sheetId = extractSheetId(url);
-            if (sheetId) {
-                // In real implementation, user would need to deploy Google Apps Script
-                showNotification('Database terhubung! Silakan deploy Google Apps Script untuk fungsi penuh.', 'success');
-                document.getElementById('setupCard').style.display = 'none';
-                connectToDatabase();
-            }
+            showNotification('Konfigurasi database tersimpan! Testing koneksi...', 'success');
+            document.getElementById('setupCard').style.display = 'none';
+            connectToDatabase();
         }
 
-        function extractSheetId(url) {
-            const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-            return match ? match[1] : null;
+        function createGoogleScript() {
+            const scriptContent = `function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const sheet = SpreadsheetApp.openById('${config.sheetsId || 'YOUR_SHEET_ID'}').getActiveSheet();
+    
+    // Add headers if sheet is empty
+    if (sheet.getLastRow() === 0) {
+      sheet.getRange(1, 1, 1, 9).setValues([['Timestamp', 'Tanggal', 'Nama', 'ID Karyawan', 'Departemen', 'Shift', 'Status', 'Waktu', 'Keterangan']]);
+    }
+    
+    // Add new row
+    sheet.appendRow([
+      data.timestamp,
+      data.date,
+      data.name,
+      data.employeeId,
+      data.department,
+      data.shift,
+      data.status,
+      data.time,
+      data.notes || ''
+    ]);
+    
+    return ContentService.createTextOutput(JSON.stringify({success: true}))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  try {
+    const sheet = SpreadsheetApp.openById('${config.sheetsId || 'YOUR_SHEET_ID'}').getActiveSheet();
+    const data = sheet.getDataRange().getValues();
+    
+    if (data.length <= 1) {
+      return ContentService.createTextOutput(JSON.stringify({success: true, data: []}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const headers = data[0];
+    const rows = data.slice(1);
+    
+    const result = rows.map(row => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[header.toLowerCase().replace(/\\s+/g, '')] = row[index];
+      });
+      return obj;
+    });
+    
+    return ContentService.createTextOutput(JSON.stringify({success: true, data: result}))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+
+            const blob = new Blob([scriptContent], { type: 'text/plain' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'AbsensiScript.gs');
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showNotification('Google Apps Script berhasil diunduh! Upload ke script.google.com', 'success');
+        }
+
+        async function testConnection() {
+            if (!config.webAppUrl) {
+                alert('Masukkan Web App URL terlebih dahulu!');
+                return;
+            }
+
+            try {
+                showNotification('Testing koneksi ke database...', 'success');
+                const response = await fetch(config.webAppUrl);
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Koneksi berhasil! Database siap digunakan.', 'success');
+                    updateConnectionStatus(true);
+                    config.isConnected = true;
+                } else {
+                    throw new Error(result.error || 'Connection failed');
+                }
+            } catch (error) {
+                showNotification('Koneksi gagal: ' + error.message, 'error');
+                updateConnectionStatus(false);
+            }
         }
 
         function connectToDatabase() {
@@ -287,26 +409,47 @@
 
         async function loadAttendanceData() {
             try {
-                // Simulate loading from Google Sheets
-                // In real implementation, this would fetch from Google Apps Script Web App
-                if (config.isConnected) {
-                    // For demo, load from localStorage and simulate real-time updates
+                if (config.isConnected && config.webAppUrl) {
+                    // Load from Google Sheets via Apps Script
+                    const response = await fetch(config.webAppUrl);
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        attendanceData = result.data.map(row => ({
+                            timestamp: row.timestamp,
+                            date: row.tanggal,
+                            name: row.nama,
+                            employeeId: row.idkaryawan,
+                            department: row.departemen,
+                            shift: row.shift,
+                            status: row.status,
+                            time: row.waktu,
+                            notes: row.keterangan
+                        }));
+                        
+                        // Also save to localStorage as backup
+                        localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+                        updateConnectionStatus(true);
+                    } else {
+                        throw new Error(result.error || 'Failed to load data');
+                    }
+                } else {
+                    // Load from localStorage as fallback
                     const storedData = JSON.parse(localStorage.getItem('attendanceData')) || [];
                     attendanceData = storedData;
-                    
-                    // Simulate periodic updates every 30 seconds
-                    setTimeout(() => {
-                        if (Math.random() > 0.7) { // 30% chance of new data
-                            loadAttendanceData();
-                        }
-                    }, 30000);
                 }
                 
                 displayAttendanceData();
             } catch (error) {
                 console.error('Error loading data:', error);
                 updateConnectionStatus(false);
-                showNotification('Gagal memuat data dari database', 'error');
+                
+                // Try to load from localStorage as fallback
+                const storedData = JSON.parse(localStorage.getItem('attendanceData')) || [];
+                attendanceData = storedData;
+                displayAttendanceData();
+                
+                showNotification('Menggunakan data lokal - koneksi database bermasalah', 'error');
             }
         }
 
@@ -425,16 +568,30 @@
         });
 
         async function saveToSpreadsheet(data) {
-            // Simulate API call to Google Apps Script
-            return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    if (Math.random() > 0.1) { // 90% success rate
-                        resolve();
-                    } else {
-                        reject(new Error('Network error'));
-                    }
-                }, 1000);
-            });
+            if (!config.webAppUrl) {
+                throw new Error('Web App URL tidak dikonfigurasi');
+            }
+
+            try {
+                const response = await fetch(config.webAppUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Gagal menyimpan ke spreadsheet');
+                }
+
+                return result;
+            } catch (error) {
+                console.error('Error saving to spreadsheet:', error);
+                throw error;
+            }
         }
 
         function refreshData() {
@@ -443,10 +600,11 @@
         }
 
         function openSpreadsheet() {
-            if (config.sheetsUrl) {
-                window.open(config.sheetsUrl, '_blank');
+            if (config.sheetsId) {
+                const sheetsUrl = `https://docs.google.com/spreadsheets/d/${config.sheetsId}/edit`;
+                window.open(sheetsUrl, '_blank');
             } else {
-                alert('URL spreadsheet belum dikonfigurasi!');
+                alert('Sheets ID belum dikonfigurasi!');
             }
         }
 
@@ -471,5 +629,5 @@
             }
         }, 120000);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97bc33e9a0225f54',t:'MTc1NzMxMDk4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97bc4405229c9fe5',t:'MTc1NzMxMTY0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
