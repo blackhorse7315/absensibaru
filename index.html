@@ -3,631 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ecrew Absensi - Transwisata Prima Aviation (Real-time Database)</title>
+    <title>ECrew Absensi - Transwisata Prima Aviation</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); }
-        .card-shadow { box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .loading { animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
-<body class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <div class="gradient-bg text-white py-6 px-4">
-        <div class="max-w-4xl mx-auto">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold">Ecrew Absensi</h1>
-                    <p class="text-blue-100">Transwisata Prima Aviation - Real-time Database</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-sm text-blue-100">Tanggal Hari Ini</p>
-                    <p class="text-lg font-semibold" id="currentDate"></p>
-                    <div class="flex items-center justify-end mt-1">
-                        <div class="w-2 h-2 bg-green-400 rounded-full mr-2" id="connectionStatus"></div>
-                        <span class="text-xs text-blue-100" id="connectionText">Connected</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<body class="bg-gray-100 text-gray-800">
 
-    <div class="max-w-4xl mx-auto px-4 py-8">
-        <!-- Setup Database -->
-        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8" id="setupCard">
-            <h2 class="text-lg font-semibold text-yellow-800 mb-4">🔧 Setup Database Spreadsheet</h2>
-            <p class="text-yellow-700 mb-4">Masukkan Google Apps Script Web App URL untuk koneksi database:</p>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-yellow-700 mb-2">Google Apps Script Web App URL</label>
-                    <input type="url" id="webAppUrl" placeholder="https://script.google.com/macros/s/your-script-id/exec"
-                           class="w-full px-4 py-3 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
-                    <p class="text-xs text-yellow-600 mt-1">Dapatkan URL ini setelah deploy Google Apps Script</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-yellow-700 mb-2">Google Sheets ID</label>
-                    <input type="text" id="sheetsId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
-                           class="w-full px-4 py-3 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
-                    <p class="text-xs text-yellow-600 mt-1">ID dari URL Google Sheets Anda</p>
-                </div>
-                <div class="flex gap-4">
-                    <button onclick="setupDatabase()" 
-                            class="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
-                        🔗 Connect Database
-                    </button>
-                    <button onclick="createGoogleScript()" 
-                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
-                        📝 Download Script
-                    </button>
-                    <button onclick="testConnection()" 
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
-                        🧪 Test Connection
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Instructions -->
-            <div class="mt-6 p-4 bg-white rounded-lg border border-yellow-200">
-                <h3 class="font-semibold text-yellow-800 mb-2">📋 Langkah Setup:</h3>
-                <ol class="text-sm text-yellow-700 space-y-1 list-decimal list-inside">
-                    <li>Buat Google Sheets baru untuk database absensi</li>
-                    <li>Copy ID dari URL Google Sheets (bagian setelah /d/)</li>
-                    <li>Klik "Download Script" untuk mendapatkan Google Apps Script</li>
-                    <li>Buka script.google.com, buat project baru, paste script</li>
-                    <li>Deploy sebagai Web App dengan akses "Anyone"</li>
-                    <li>Copy URL Web App dan masukkan di form di atas</li>
-                    <li>Klik "Connect Database" untuk menghubungkan</li>
-                </ol>
-            </div>
-        </div>
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-800">ECrew Absensi</h1>
+            <p class="text-lg text-gray-600">Transwisata Prima Aviation</p>
+        </header>
 
         <!-- Form Absensi -->
-        <div class="bg-white rounded-xl card-shadow p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-6">Form Absensi Karyawan</h2>
-            
-            <form id="attendanceForm" class="space-y-4">
-                <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Formulir Kehadiran</h2>
+            <form id="attendanceForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Kolom Kiri -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                        <input type="text" id="employeeName" required 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">ID Karyawan</label>
-                        <input type="text" id="employeeId" required 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Departemen</label>
-                        <select id="department" required 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Pilih Departemen</option>
-                            <option value="Flight Operations">Flight Operations</option>
-                            <option value="Ground Operations">Ground Operations</option>
-                            <option value="Maintenance">Maintenance</option>
-                            <option value="Customer Service">Customer Service</option>
-                            <option value="Administration">Administration</option>
-                            <option value="Security">Security</option>
+                        <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Kru</label>
+                        <select id="nama" name="nama" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <option value="">-- Pilih Nama --</option>
+                            <!-- Daftar nama kru bisa ditambahkan di sini -->
+                            <option value="Capt. John Doe" data-nip="112233">Capt. John Doe</option>
+                            <option value="FO. Jane Smith" data-nip="112244">FO. Jane Smith</option>
+                            <option value="FA. Emily White" data-nip="112255">FA. Emily White</option>
+                            <option value="FA. Michael Brown" data-nip="112266">FA. Michael Brown</option>
+                            <option value="ENG. Chris Green" data-nip="112277">ENG. Chris Green</option>
                         </select>
                     </div>
+                     <div>
+                        <label for="nip" class="block text-sm font-medium text-gray-700 mb-1">Nomor Induk Pegawai (NIP)</label>
+                        <input type="text" id="nip" name="nip" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg shadow-sm">
+                    </div>
+
+                    <!-- Kolom Kanan -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Shift</label>
-                        <select id="shift" required 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Pilih Shift</option>
-                            <option value="Pagi (06:00-14:00)">Pagi (06:00-14:00)</option>
-                            <option value="Siang (14:00-22:00)">Siang (14:00-22:00)</option>
-                            <option value="Malam (22:00-06:00)">Malam (22:00-06:00)</option>
+                        <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                        <input type="date" id="tanggal" name="tanggal" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status Kehadiran</label>
+                        <select id="status" name="status" required class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <option value="Hadir">Hadir</option>
+                            <option value="Izin">Izin</option>
+                            <option value="Sakit">Sakit</option>
+                            <option value="Cuti">Cuti</option>
                         </select>
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status Kehadiran</label>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="status" value="Hadir" required class="mr-2 text-blue-600">
-                            <span class="text-sm">✅ Hadir</span>
-                        </label>
-                        <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="status" value="Terlambat" required class="mr-2 text-blue-600">
-                            <span class="text-sm">⏰ Terlambat</span>
-                        </label>
-                        <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="status" value="Sakit" required class="mr-2 text-blue-600">
-                            <span class="text-sm">🏥 Sakit</span>
-                        </label>
-                        <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input type="radio" name="status" value="Izin" required class="mr-2 text-blue-600">
-                            <span class="text-sm">📝 Izin</span>
-                        </label>
+                    <!-- Jam & Keterangan -->
+                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div>
+                            <label for="jamMasuk" class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="time" id="jamMasuk" name="jamMasuk" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm">
+                                <button type="button" id="setJamMasuk" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">Sekarang</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="jamPulang" class="block text-sm font-medium text-gray-700 mb-1">Jam Pulang (Opsional)</label>
+                            <div class="flex items-center space-x-2">
+                               <input type="time" id="jamPulang" name="jamPulang" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm">
+                               <button type="button" id="setJamPulang" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">Sekarang</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-1">Keterangan</label>
+                        <textarea id="keterangan" name="keterangan" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Contoh: Bertugas untuk penerbangan ke Bali"></textarea>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan (Opsional)</label>
-                    <textarea id="notes" rows="3" 
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Tambahkan keterangan jika diperlukan..."></textarea>
-                </div>
-
-                <div class="flex gap-4 pt-4">
-                    <button type="submit" 
-                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center">
-                        <span class="loading w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2 hidden" id="submitLoading"></span>
-                        📝 Submit Absensi
-                    </button>
-                    <button type="button" onclick="refreshData()" 
-                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                        🔄 Refresh Data
+                <!-- Tombol Submit -->
+                <div class="mt-8 text-right">
+                    <button type="submit" id="submitBtn" class="px-8 py-3 bg-blue-800 text-white font-bold rounded-lg hover:bg-blue-900 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105">
+                        Kirim Absensi
                     </button>
                 </div>
             </form>
+            <div id="messageBox" class="mt-4 text-center"></div>
         </div>
 
-        <!-- Data Absensi -->
-        <div class="bg-white rounded-xl card-shadow p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-semibold text-gray-800">Data Absensi Real-time</h2>
-                <div class="flex items-center gap-4">
-                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium" id="totalCount">
-                        Total: 0 karyawan
-                    </span>
-                    <button onclick="openSpreadsheet()" 
-                            class="bg-gray-600 hover:bg-gray-700 text-white text-sm px-3 py-1 rounded-lg transition duration-200">
-                        📊 Buka Spreadsheet
-                    </button>
-                </div>
+        <!-- Log Absensi Real-time -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Log Absensi Hari Ini</h2>
+             <div class="flex justify-center items-center h-40" id="loaderContainer">
+                <div class="loader"></div>
+                <p class="ml-4 text-gray-500">Memuat data...</p>
             </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">No</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nama</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">ID</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Departemen</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Waktu</th>
+            <div class="overflow-x-auto" id="logContainer" style="display:none;">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
                         </tr>
                     </thead>
-                    <tbody id="attendanceTable">
-                        <tr>
-                            <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                                <div class="loading w-6 h-6 border-2 border-gray-300 border-t-blue-600 rounded-full mx-auto mb-2"></div>
-                                Memuat data dari database...
-                            </td>
-                        </tr>
+                    <tbody id="attendanceLog" class="bg-white divide-y divide-gray-200">
+                        <!-- Data akan dimasukkan oleh JavaScript -->
                     </tbody>
                 </table>
             </div>
         </div>
+
     </div>
 
     <script>
-        // Configuration
-        let config = {
-            webAppUrl: localStorage.getItem('webAppUrl') || '',
-            sheetsId: localStorage.getItem('sheetsId') || '',
-            isConnected: false
+        // PENTING: Ganti URL ini dengan URL Web App dari Google Apps Script Anda
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzw6AkHW-QYQPKYoQXpgqW9tTIb0AXJW67o0xk_D4KUT3kfcYLwueIaMUu03GoNLvXq/exec';
+
+        const form = document.getElementById('attendanceForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageBox = document.getElementById('messageBox');
+        
+        const namaSelect = document.getElementById('nama');
+        const nipInput = document.getElementById('nip');
+        const tanggalInput = document.getElementById('tanggal');
+        
+        const jamMasukInput = document.getElementById('jamMasuk');
+        const setJamMasukBtn = document.getElementById('setJamMasuk');
+        const jamPulangInput = document.getElementById('jamPulang');
+        const setJamPulangBtn = document.getElementById('setJamPulang');
+
+        const attendanceLog = document.getElementById('attendanceLog');
+        const loaderContainer = document.getElementById('loaderContainer');
+        const logContainer = document.getElementById('logContainer');
+
+        // Fungsi untuk mendapatkan waktu saat ini dalam format HH:MM
+        const getCurrentTime = () => {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
         };
 
-        // Data storage
-        let attendanceData = [];
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCurrentDate();
-            if (config.webAppUrl && config.sheetsId) {
-                document.getElementById('webAppUrl').value = config.webAppUrl;
-                document.getElementById('sheetsId').value = config.sheetsId;
-                document.getElementById('setupCard').style.display = 'none';
-                connectToDatabase();
-            }
-            loadAttendanceData();
-        });
-
-        function updateCurrentDate() {
+        // Fungsi untuk mendapatkan tanggal saat ini dalam format YYYY-MM-DD
+        const getCurrentDate = () => {
             const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
-            document.getElementById('currentDate').textContent = 
-                now.toLocaleDateString('id-ID', options);
-        }
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
 
-        function setupDatabase() {
-            const webAppUrl = document.getElementById('webAppUrl').value.trim();
-            const sheetsId = document.getElementById('sheetsId').value.trim();
-            
-            if (!webAppUrl || !sheetsId) {
-                alert('Masukkan Web App URL dan Sheets ID terlebih dahulu!');
-                return;
-            }
+        // Event listener untuk tombol jam
+        setJamMasukBtn.addEventListener('click', () => jamMasukInput.value = getCurrentTime());
+        setJamPulangBtn.addEventListener('click', () => jamPulangInput.value = getCurrentTime());
 
-            config.webAppUrl = webAppUrl;
-            config.sheetsId = sheetsId;
-            localStorage.setItem('webAppUrl', webAppUrl);
-            localStorage.setItem('sheetsId', sheetsId);
-            
-            showNotification('Konfigurasi database tersimpan! Testing koneksi...', 'success');
-            document.getElementById('setupCard').style.display = 'none';
-            connectToDatabase();
-        }
-
-        function createGoogleScript() {
-            const scriptContent = `function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
-    const sheet = SpreadsheetApp.openById('${config.sheetsId || 'YOUR_SHEET_ID'}').getActiveSheet();
-    
-    // Add headers if sheet is empty
-    if (sheet.getLastRow() === 0) {
-      sheet.getRange(1, 1, 1, 9).setValues([['Timestamp', 'Tanggal', 'Nama', 'ID Karyawan', 'Departemen', 'Shift', 'Status', 'Waktu', 'Keterangan']]);
-    }
-    
-    // Add new row
-    sheet.appendRow([
-      data.timestamp,
-      data.date,
-      data.name,
-      data.employeeId,
-      data.department,
-      data.shift,
-      data.status,
-      data.time,
-      data.notes || ''
-    ]);
-    
-    return ContentService.createTextOutput(JSON.stringify({success: true}))
-      .setMimeType(ContentService.MimeType.JSON);
-      
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doGet(e) {
-  try {
-    const sheet = SpreadsheetApp.openById('${config.sheetsId || 'YOUR_SHEET_ID'}').getActiveSheet();
-    const data = sheet.getDataRange().getValues();
-    
-    if (data.length <= 1) {
-      return ContentService.createTextOutput(JSON.stringify({success: true, data: []}))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const headers = data[0];
-    const rows = data.slice(1);
-    
-    const result = rows.map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header.toLowerCase().replace(/\\s+/g, '')] = row[index];
-      });
-      return obj;
-    });
-    
-    return ContentService.createTextOutput(JSON.stringify({success: true, data: result}))
-      .setMimeType(ContentService.MimeType.JSON);
-      
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}`;
-
-            const blob = new Blob([scriptContent], { type: 'text/plain' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'AbsensiScript.gs');
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            showNotification('Google Apps Script berhasil diunduh! Upload ke script.google.com', 'success');
-        }
-
-        async function testConnection() {
-            if (!config.webAppUrl) {
-                alert('Masukkan Web App URL terlebih dahulu!');
-                return;
-            }
-
-            try {
-                showNotification('Testing koneksi ke database...', 'success');
-                const response = await fetch(config.webAppUrl);
-                const result = await response.json();
-                
-                if (result.success) {
-                    showNotification('Koneksi berhasil! Database siap digunakan.', 'success');
-                    updateConnectionStatus(true);
-                    config.isConnected = true;
-                } else {
-                    throw new Error(result.error || 'Connection failed');
-                }
-            } catch (error) {
-                showNotification('Koneksi gagal: ' + error.message, 'error');
-                updateConnectionStatus(false);
-            }
-        }
-
-        function connectToDatabase() {
-            updateConnectionStatus(true);
-            config.isConnected = true;
-            loadAttendanceData();
-        }
-
-        function updateConnectionStatus(connected) {
-            const statusDot = document.getElementById('connectionStatus');
-            const statusText = document.getElementById('connectionText');
-            
-            if (connected) {
-                statusDot.className = 'w-2 h-2 bg-green-400 rounded-full mr-2';
-                statusText.textContent = 'Connected';
-            } else {
-                statusDot.className = 'w-2 h-2 bg-red-400 rounded-full mr-2';
-                statusText.textContent = 'Disconnected';
-            }
-        }
-
-        function createSampleSheet() {
-            const headers = ['Timestamp', 'Tanggal', 'Nama', 'ID Karyawan', 'Departemen', 'Shift', 'Status', 'Waktu', 'Keterangan'];
-            const csvContent = headers.join(',') + '\n';
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'Template_Absensi_Transwisata.csv');
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            showNotification('Template spreadsheet berhasil diunduh! Upload ke Google Sheets dan bagikan URL-nya.', 'success');
-        }
-
-        async function loadAttendanceData() {
-            try {
-                if (config.isConnected && config.webAppUrl) {
-                    // Load from Google Sheets via Apps Script
-                    const response = await fetch(config.webAppUrl);
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        attendanceData = result.data.map(row => ({
-                            timestamp: row.timestamp,
-                            date: row.tanggal,
-                            name: row.nama,
-                            employeeId: row.idkaryawan,
-                            department: row.departemen,
-                            shift: row.shift,
-                            status: row.status,
-                            time: row.waktu,
-                            notes: row.keterangan
-                        }));
-                        
-                        // Also save to localStorage as backup
-                        localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
-                        updateConnectionStatus(true);
-                    } else {
-                        throw new Error(result.error || 'Failed to load data');
-                    }
-                } else {
-                    // Load from localStorage as fallback
-                    const storedData = JSON.parse(localStorage.getItem('attendanceData')) || [];
-                    attendanceData = storedData;
-                }
-                
-                displayAttendanceData();
-            } catch (error) {
-                console.error('Error loading data:', error);
-                updateConnectionStatus(false);
-                
-                // Try to load from localStorage as fallback
-                const storedData = JSON.parse(localStorage.getItem('attendanceData')) || [];
-                attendanceData = storedData;
-                displayAttendanceData();
-                
-                showNotification('Menggunakan data lokal - koneksi database bermasalah', 'error');
-            }
-        }
-
-        function displayAttendanceData() {
-            const tableBody = document.getElementById('attendanceTable');
-            const totalCount = document.getElementById('totalCount');
-
-            if (attendanceData.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                            ${config.isConnected ? 'Belum ada data absensi' : 'Hubungkan ke database untuk melihat data'}
-                        </td>
-                    </tr>
-                `;
-            } else {
-                // Sort by most recent first
-                const sortedData = [...attendanceData].sort((a, b) => 
-                    new Date(b.timestamp) - new Date(a.timestamp)
-                );
-
-                tableBody.innerHTML = sortedData.map((record, index) => `
-                    <tr class="border-t hover:bg-gray-50">
-                        <td class="px-4 py-3 text-sm">${index + 1}</td>
-                        <td class="px-4 py-3 text-sm">${record.date}</td>
-                        <td class="px-4 py-3 text-sm font-medium">${record.name}</td>
-                        <td class="px-4 py-3 text-sm">${record.employeeId}</td>
-                        <td class="px-4 py-3 text-sm">${record.department}</td>
-                        <td class="px-4 py-3 text-sm">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(record.status)}">
-                                ${record.status}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-sm">${record.time}</td>
-                    </tr>
-                `).join('');
-            }
-
-            totalCount.textContent = `Total: ${attendanceData.length} karyawan`;
-        }
-
-        function getStatusColor(status) {
-            const colors = {
-                'Hadir': 'bg-green-100 text-green-800',
-                'Terlambat': 'bg-yellow-100 text-yellow-800',
-                'Sakit': 'bg-red-100 text-red-800',
-                'Izin': 'bg-blue-100 text-blue-800'
-            };
-            return colors[status] || 'bg-gray-100 text-gray-800';
-        }
-
-        // Form submission
-        document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (!config.isConnected) {
-                alert('Hubungkan ke database terlebih dahulu!');
-                return;
-            }
-
-            const submitButton = e.target.querySelector('button[type="submit"]');
-            const loading = document.getElementById('submitLoading');
-            
-            // Show loading
-            loading.classList.remove('hidden');
-            submitButton.disabled = true;
-
-            try {
-                const formData = {
-                    name: document.getElementById('employeeName').value,
-                    employeeId: document.getElementById('employeeId').value,
-                    department: document.getElementById('department').value,
-                    shift: document.getElementById('shift').value,
-                    status: document.querySelector('input[name="status"]:checked').value,
-                    notes: document.getElementById('notes').value,
-                    timestamp: new Date().toISOString(),
-                    time: new Date().toLocaleTimeString('id-ID', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    }),
-                    date: new Date().toLocaleDateString('id-ID')
-                };
-
-                // Check if employee already recorded today
-                const today = new Date().toDateString();
-                const existingRecord = attendanceData.find(record => 
-                    record.employeeId === formData.employeeId && 
-                    new Date(record.timestamp).toDateString() === today
-                );
-
-                if (existingRecord) {
-                    throw new Error('Karyawan dengan ID ini sudah melakukan absensi hari ini!');
-                }
-
-                // Save to Google Sheets (simulated)
-                await saveToSpreadsheet(formData);
-
-                // Update local data
-                attendanceData.push(formData);
-                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
-
-                // Reset form and reload data
-                this.reset();
-                displayAttendanceData();
-
-                showNotification('Absensi berhasil disimpan ke database!', 'success');
-
-            } catch (error) {
-                console.error('Error saving data:', error);
-                showNotification(error.message || 'Gagal menyimpan data ke database', 'error');
-            } finally {
-                // Hide loading
-                loading.classList.add('hidden');
-                submitButton.disabled = false;
-            }
+        // Otomatis isi NIP saat nama dipilih
+        namaSelect.addEventListener('change', (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            nipInput.value = selectedOption.dataset.nip || '';
         });
 
-        async function saveToSpreadsheet(data) {
-            if (!config.webAppUrl) {
-                throw new Error('Web App URL tidak dikonfigurasi');
-            }
-
-            try {
-                const response = await fetch(config.webAppUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-                
-                if (!result.success) {
-                    throw new Error(result.error || 'Gagal menyimpan ke spreadsheet');
-                }
-
-                return result;
-            } catch (error) {
-                console.error('Error saving to spreadsheet:', error);
-                throw error;
-            }
-        }
-
-        function refreshData() {
-            showNotification('Memperbarui data dari database...', 'success');
-            loadAttendanceData();
-        }
-
-        function openSpreadsheet() {
-            if (config.sheetsId) {
-                const sheetsUrl = `https://docs.google.com/spreadsheets/d/${config.sheetsId}/edit`;
-                window.open(sheetsUrl, '_blank');
-            } else {
-                alert('Sheets ID belum dikonfigurasi!');
-            }
-        }
-
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white font-medium z-50 ${
-                type === 'success' ? 'bg-green-500' : 'bg-red-500'
-            }`;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
+        // Tampilkan pesan
+        const showMessage = (message, isError = false) => {
+            messageBox.textContent = message;
+            messageBox.className = `mt-4 text-center p-3 rounded-lg ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
             setTimeout(() => {
-                notification.remove();
-            }, 4000);
-        }
+                messageBox.textContent = '';
+                messageBox.className = 'mt-4 text-center';
+            }, 5000);
+        };
 
-        // Auto-refresh data every 2 minutes when connected
-        setInterval(() => {
-            if (config.isConnected) {
-                loadAttendanceData();
+        // Fungsi submit form
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (SCRIPT_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+                showMessage('Error: URL Google Apps Script belum diatur. Silakan ikuti panduan setup.', true);
+                return;
             }
-        }, 120000);
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Mengirim...';
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            data.timestamp = new Date().toISOString();
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.result === "success") {
+                    showMessage('Absensi berhasil dikirim!', false);
+                    form.reset();
+                    fetchAttendance(); // Muat ulang data log
+                } else {
+                    throw new Error(data.message || 'Terjadi kesalahan');
+                }
+            })
+            .catch(error => {
+                console.error('Error!', error);
+                showMessage(`Error: ${error.message}`, true);
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Kirim Absensi';
+            });
+        });
+
+        // Fungsi untuk mengambil data absensi
+        const fetchAttendance = () => {
+            if (SCRIPT_URL === 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+                loaderContainer.innerHTML = '<p class="text-red-500">URL Google Apps Script belum diatur.</p>';
+                return;
+            }
+
+            loaderContainer.style.display = 'flex';
+            logContainer.style.display = 'none';
+
+            fetch(SCRIPT_URL)
+                .then(res => res.json())
+                .then(data => {
+                    attendanceLog.innerHTML = ''; // Kosongkan tabel sebelum diisi
+                    if (data.length > 0) {
+                        data.forEach(row => {
+                            const tr = document.createElement('tr');
+                            
+                            let statusClass = '';
+                            switch(row.Status.toLowerCase()) {
+                                case 'hadir': statusClass = 'bg-green-100 text-green-800'; break;
+                                case 'sakit': statusClass = 'bg-yellow-100 text-yellow-800'; break;
+                                case 'izin': statusClass = 'bg-blue-100 text-blue-800'; break;
+                                case 'cuti': statusClass = 'bg-purple-100 text-purple-800'; break;
+                                default: statusClass = 'bg-gray-100 text-gray-800';
+                            }
+                            
+                            tr.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">${row.Nama}</div>
+                                    <div class="text-sm text-gray-500">${row.NIP}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                                        ${row.Status}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    ${row.JamMasuk || '-'} ${row.JamPulang ? ' s/d ' + row.JamPulang : ''}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Keterangan}</td>
+                            `;
+                            attendanceLog.appendChild(tr);
+                        });
+                    } else {
+                         attendanceLog.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-gray-500">Belum ada data absensi untuk hari ini.</td></tr>';
+                    }
+                    loaderContainer.style.display = 'none';
+                    logContainer.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    loaderContainer.innerHTML = '<p class="text-red-500">Gagal memuat data. Periksa koneksi atau konfigurasi script.</p>';
+                });
+        };
+
+        // Inisialisasi halaman
+        document.addEventListener('DOMContentLoaded', () => {
+            tanggalInput.value = getCurrentDate();
+            fetchAttendance();
+            // Refresh data setiap 30 detik
+            setInterval(fetchAttendance, 30000);
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97bc4405229c9fe5',t:'MTc1NzMxMTY0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
